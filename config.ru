@@ -1,7 +1,6 @@
 require 'grape'
 require 'rack-cache'
 require 'rack/cache/key'
-require 'digest/md5'
 
 require_relative 'ah_shop'
 
