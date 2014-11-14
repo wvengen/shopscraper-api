@@ -15,7 +15,7 @@ class API < Grape::API
     namespace :ah do
       resources :orders do
 
-        http_basic do |username, password|
+        http_basic({realm: 'AH webshop login'}) do |username, password|
           @shop = AHShop.new
           @shop.login(username, password)
         end
