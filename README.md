@@ -10,8 +10,9 @@ Usage
 Having [Ruby](http://ruby-lang.org/) and [Bundler](http://bundler.io),
 run `bundle install` to install the dependencies, then `rackup` to start
 the server. By default, the server listens at port 9292, and you could
-go to http://localhost:9292/api/v1/shop/ah/orders
+go to [http://localhost:9292/api/v1/shop/ah/orders](http://localhost:9292/api/v1/shop/ah/orders).
 
+Requests are cached for 15 minutes (each login separately, of course).
 
 
 Endpoints
@@ -65,7 +66,7 @@ Command-line example
 --------------------
 
 An example command-line application can be found in cli.rb. It expects
-username, password and an optional orderid as parameters.
+username, password and an optional orderid as arguments.
 
 ```
 $ ./cli.rb me@example.com s3rect
