@@ -1,7 +1,7 @@
-AH webshop API
-==============
+AH & Jumbo webshop API
+======================
 
-An API for the AH webshop. Uses HTTP basic auth for webshop acount.
+An API for the AH and Jumbo webshop. Uses HTTP basic auth for webshop acount.
 
 
 Usage
@@ -20,18 +20,49 @@ Endpoints
 
 ### `GET /api/v1/shop/ah/products/:id`
 
-Returns product information.
+Returns AH product information.
 
 ```json
 {
   "product": {
     "id": "wi227237",
     "name": "AH Stoommaaltijd kip rozemarijn",
-    "brand": "AH",
+    "brand_name": "AH",
     "unit": "450 gr",
     "url": "http://www.ah.nl/producten/product/wi227237/ah-stoommaaltijd-kip-rozemarijn",
     "image_url": "http://beeldbank.ahold.com.kpnis.nl/getimage/AHI_434d50313631343639?dRevLabel=1&Rendition=200x200_JPG",
     "description": "Stoommaaltijd met gemarineerde kipfilet, haricots verts en gemarineerde aardappel in schil. Inhoud: haricots verts, gemarineerde aardappel in schil, gemarineerde kipfilet, spekreepjes, kruidenboter en rozemarijn.Lekkere kruidenboter maakt deze stoommaaltijd compleet.Met lekkere knapperige haricots vertsAllergenen: bevat lactose, melkeiwit, tarwegluten. Gemaakt in een bedrijf waar ook pinda's en noten worden verwerkt. De kwaliteit is tot 1 dag na afleveren gegarandeerd."
+  }
+}
+```
+
+### `GET /api/v1/shop/jumbo/products/:id`
+
+Returns Jumbo product information.
+
+```json
+{
+  "product": {
+    "url": "http://www.jumbo.com:80/cool-product/1234AB/",
+    "id": "1234AB",
+    "name": "Cool Product",
+    "unit": "250 g",
+    "brand_url": "http://www.coolproducer.nl",
+    "currency": "EUR",
+    "price": 1.23,
+    "storage": "Koel bewaren.",
+    "preparation": "Coole gebruiksaanwijzing: eet mij.",
+    "ingredients": [
+      "Lekkers",
+      "E9876543210"
+    ],
+    "nutrients": [
+      {"name": "Energie", "value": "1000 kJ (880 kcal) / 100 g"},
+      {"name": "Eiwitten", "value": "<0,5 g / 100 g"},
+      {"name": "Natrium", "value": "0,55 g / 100 g"},
+    ],
+    "image_url": "http://www.jumbo.com/INTERSHOP/static/WFS/Jumbo-Grocery-Site/-/Jumbo-Grocery/nl_NL/product_images/1234AB-1_360x360.png",
+    "description": "Dit is echt heel lekker, hoor. Blabla en bla."
   }
 }
 ```

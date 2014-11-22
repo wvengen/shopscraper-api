@@ -3,6 +3,7 @@ require 'rack-cache'
 require 'rack/cache/key'
 
 require_relative 'ah_shop'
+require_relative 'jumbo_shop'
 
 
 class API < Grape::API
@@ -10,14 +11,16 @@ class API < Grape::API
   prefix :api
   version :v1, using: :path
 
-  helpers do
-    def shop
-      @shop ||= AHShop.new
-    end
-  end
-
   namespace :shop do
+
     namespace :ah do
+
+      helpers do
+        def shop
+          @shop ||= AHShop.new
+        end
+      end
+
       resources :orders do
 
         http_basic({realm: 'AH webshop login'}) do |username, password|
@@ -52,6 +55,26 @@ class API < Grape::API
       end
 
     end
+
+    namespace :jumbo do
+
+      helpers do
+        def shop
+          @shop ||= JumboShop.new
+        end
+      end
+
+      resources :products do
+        route_param :id do
+          desc "Return product information"
+          get do
+            product = shop.product(params.id)
+            {product: product.to_h}
+          end
+        end
+      end
+    end
+
   end
 end
 

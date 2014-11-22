@@ -4,7 +4,7 @@ require 'typhoeus'
 
 class AHShop
   BASEURL = 'http://www.ah.nl/'
-  PRODUCT_URL = BASEURL+'producten/product'
+  PRODUCT_URL = BASEURL+'producten/product/'
 
   BASEURL_SECURE = 'https://www.ah.nl/'
   LOGIN_URL = BASEURL_SECURE+'mijn/inloggen/basis'
@@ -45,12 +45,12 @@ class AHShop
 
   def product(id, options={})
     product = OpenStruct.new
-    @mech.get "#{PRODUCT_URL}/#{id}" do |page|
+    @mech.get PRODUCT_URL+id do |page|
       product.url = page.search('meta[property="og:url"]').first.attribute('content').value
       product.id = product_id_from_url(product.url)
       product.name = page.search('meta[property="og:title"]').attribute('content').value
       product.unit = page.search('#content .unit').inner_text.strip
-      product.brand = page.search('meta[itemprop="brand"]').first.attribute('content').value
+      product.brand_name page.search('meta[itemprop="brand"]').first.attribute('content').value
       product.image_url = page.search('meta[property="og:image"]').first.attribute('content').value
       product.description = page.search('.product-detail__content').inner_text.strip
     end
@@ -114,7 +114,7 @@ class AHShop
   private
 
   def product_id_from_url(url)
-    url.match /^#{PRODUCT_URL}\/+(.*?)(\/+.*)?$/ and $1
+    url.match /^#{PRODUCT_URL}\/*(.*?)(\/+.*)?$/ and $1
   end
 
 end
