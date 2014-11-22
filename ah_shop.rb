@@ -1,8 +1,8 @@
-require 'mechanize'
 require 'ostruct'
 require 'typhoeus'
+require_relative 'shop'
 
-class AHShop
+class AHShop < Shop
   BASEURL = 'http://www.ah.nl/'
   PRODUCT_URL = BASEURL+'producten/product/'
 
@@ -10,10 +10,6 @@ class AHShop
   LOGIN_URL = BASEURL_SECURE+'mijn/inloggen/basis'
   LIST_ORDERS_URL = BASEURL_SECURE+'appie/producten/eerder-gekocht/bestellingen'
   ORDER_URL = BASEURL_SECURE+'appie/producten/eerder-gekocht/bestelling'
-
-  def initialize(mech=Mechanize.new)
-    @mech = mech
-  end
 
   def login(user, pass)
     status = false
@@ -33,9 +29,9 @@ class AHShop
     @mech.get LIST_ORDERS_URL do |page|
       page.search('a.order_card').each do |page|
         order = OpenStruct.new
-        order.date = page.search('.date').text.strip
-        order.info = page.search('.info').text.strip
-        order.url = page.attribute('href').value
+        order.date = search_first_text(page, '.date')
+        order.info = search_all_text(page, '.info')
+        order.url = BASEURL+page.attribute('href').value
         order.id = order.url.sub(/^.*orderno=/, '')
         orders << order
       end
@@ -46,13 +42,13 @@ class AHShop
   def product(id, options={})
     product = OpenStruct.new
     @mech.get PRODUCT_URL+id do |page|
-      product.url = page.search('meta[property="og:url"]').first.attribute('content').value
+      product.url = search_first_attr(page, 'meta[property="og:url"]', 'content')
       product.id = product_id_from_url(product.url)
-      product.name = page.search('meta[property="og:title"]').attribute('content').value
-      product.unit = page.search('#content .unit').inner_text.strip
-      product.brand_name page.search('meta[itemprop="brand"]').first.attribute('content').value
-      product.image_url = page.search('meta[property="og:image"]').first.attribute('content').value
-      product.description = page.search('.product-detail__content').inner_text.strip
+      product.name = search_first_attr(page, 'meta[property="og:title"]', 'content')
+      product.unit = search_first_text(page, '#content .unit')
+      product.brand_name = search_first_attr(page, 'meta[itemprop="brand"]', 'content')
+      product.image_url = search_first_attr(page, 'meta[property="og:image"]', 'content')
+      product.description = search_all_text(page, '.product-detail__content')
     end
     product
   end
@@ -70,8 +66,8 @@ class AHShop
         else
           order.products << OpenStruct.new({
             name: li.children.select{|e| e.is_a? Nokogiri::XML::Text}.map(&:text).join(''),
-            quantity: li.search('.quantity').inner_text.gsub(/\s*x\s*$/, ''),
-            unit: li.search('.unit').inner_text.strip,
+            quantity: search_first_text(li, '.quantity') {|t| t.gsub(/\s*x\s*$/, '') },
+            unit: search_first_text(li, '.unit'),
             category: category
           })
         end
@@ -79,14 +75,14 @@ class AHShop
     end
     # gather extra info from non-printing page
     @mech.get "#{ORDER_URL}?orderno=#{order_id}" do |page|
-      order.date = page.search('.header h2').text.gsub(/\A.*op\s+/m, '').strip
+      order.date = search_first_text(page, '.header h2') {|t| t.gsub(/\A.*op\s+/m, '') }
       page.search('#content .product').each do |p|
-        cur_name = p.search('.image img').attribute('alt').value
+        cur_name = search_first_attr(p, '.image img', 'alt')
         if i = order.products.index{|p| cur_name.strip.downcase.include? p.name.strip.downcase }
           product = order.products[i]
-          product.url = BASEURL + p.search('.detail a').first.attribute('href').value
-          product.image_url = p.search('.image img').first.attribute('data-original').value
-          product.id = product_id_from_url(url)
+          product.url = search_first_attr(p, '.detail a', 'href') {|t| BASEURL+t}
+          product.image_url = search_first_attr(p, '.image img', 'data-original')
+          product.id = product_id_from_url(product.url)
         end
       end
     end
@@ -114,7 +110,7 @@ class AHShop
   private
 
   def product_id_from_url(url)
-    url.match /^#{PRODUCT_URL}\/*(.*?)(\/+.*)?$/ and $1
+    url.gsub('//', '/').match(/^#{PRODUCT_URL.gsub('//','/')}(.*?)(\/+.*)?$/) and $1
   end
 
 end
