@@ -38,8 +38,8 @@ class JumboShop < Shop
         product.nutrients.last and product.nutrients.last[:name] =~ /Aanbevolen Dagelijkse Hoeveelheid/i and product.nutrients.pop
 
         product.image_url = search_first_attr(page, '[data-jum-role="mainImage"] img', 'data-jum-src') {|t| BASEURL+t}
-        product.description = search_all_text(page, '.jum-summary-description')
-        product.description =~ /lees\s+meer/i and product.description = nil
+        product.description = search_all_text(page, '#jum-summary-description')
+        product.description =~ /^lees\s+meer$/i and product.description = nil
       end
     end
     product
