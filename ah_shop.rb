@@ -3,10 +3,13 @@ require 'ostruct'
 require 'typhoeus'
 
 class AHShop
-  BASEURL = 'https://www.ah.nl/'
-  LOGIN_URL = BASEURL+'mijn/inloggen/basis'
-  LIST_ORDERS_URL = BASEURL+'appie/producten/eerder-gekocht/bestellingen'
-  ORDER_URL = BASEURL+'appie/producten/eerder-gekocht/bestelling'
+  BASEURL = 'http://www.ah.nl/'
+  PRODUCT_URL = BASEURL+'producten/product'
+
+  BASEURL_SECURE = 'https://www.ah.nl/'
+  LOGIN_URL = BASEURL_SECURE+'mijn/inloggen/basis'
+  LIST_ORDERS_URL = BASEURL_SECURE+'appie/producten/eerder-gekocht/bestellingen'
+  ORDER_URL = BASEURL_SECURE+'appie/producten/eerder-gekocht/bestelling'
 
   def initialize(mech=Mechanize.new)
     @mech = mech
@@ -40,14 +43,16 @@ class AHShop
     orders
   end
 
-  def product(url, options={})
+  def product(id, options={})
     product = OpenStruct.new
-    @mech.get url do |page|
+    @mech.get "#{PRODUCT_URL}/#{id}" do |page|
       product.url = page.search('meta[property="og:url"]').first.attribute('content').value
+      product.id = product_id_from_url(product.url)
       product.name = page.search('meta[property="og:title"]').attribute('content').value
       product.unit = page.search('#content .unit').inner_text.strip
       product.brand = page.search('meta[itemprop="brand"]').first.attribute('content').value
       product.image_url = page.search('meta[property="og:image"]').first.attribute('content').value
+      product.description = page.search('.product-detail__content').inner_text.strip
     end
     product
   end
@@ -81,6 +86,7 @@ class AHShop
           product = order.products[i]
           product.url = BASEURL + p.search('.detail a').first.attribute('href').value
           product.image_url = p.search('.image img').first.attribute('data-original').value
+          product.id = product_id_from_url(url)
         end
       end
     end
@@ -103,6 +109,12 @@ class AHShop
     end
 
     order
+  end
+
+  private
+
+  def product_id_from_url(url)
+    url.match /^#{PRODUCT_URL}\/+(.*?)(\/+.*)?$/ and $1
   end
 
 end

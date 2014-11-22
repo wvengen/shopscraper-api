@@ -18,9 +18,27 @@ Requests are cached for 15 minutes (each login separately, of course).
 Endpoints
 ---------
 
+### `GET /api/v1/shop/ah/products/:id`
+
+Returns product information.
+
+```json
+{
+  "product": {
+    "id": "wi227237",
+    "name": "AH Stoommaaltijd kip rozemarijn",
+    "brand": "AH",
+    "unit": "450 gr",
+    "url": "http://www.ah.nl/producten/product/wi227237/ah-stoommaaltijd-kip-rozemarijn",
+    "image_url": "http://beeldbank.ahold.com.kpnis.nl/getimage/AHI_434d50313631343639?dRevLabel=1&Rendition=200x200_JPG",
+    "description": "Stoommaaltijd met gemarineerde kipfilet, haricots verts en gemarineerde aardappel in schil. Inhoud: haricots verts, gemarineerde aardappel in schil, gemarineerde kipfilet, spekreepjes, kruidenboter en rozemarijn.Lekkere kruidenboter maakt deze stoommaaltijd compleet.Met lekkere knapperige haricots vertsAllergenen: bevat lactose, melkeiwit, tarwegluten. Gemaakt in een bedrijf waar ook pinda's en noten worden verwerkt. De kwaliteit is tot 1 dag na afleveren gegarandeerd."
+  }
+}
+```
+
 ### `GET /api/v1/shop/ah/orders`
 
-Returns orders for a user.
+Returns orders for a user (auth required).
 
 ```json
 {
@@ -37,7 +55,7 @@ Returns orders for a user.
 
 ### `GET /api/v1/shop/ah/orders/:id`
 
-Returns information about an order, most importantly its products.
+Returns information about an order, most importantly its products (auth required).
 
 ```json
 {
