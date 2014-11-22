@@ -78,7 +78,7 @@ Returns orders for a user (auth required).
       "id": "1234",
       "date": "dinsdag 11 november",
       "url": "https://www.ah.nl/producten/eerder-gekocht/bestelling?orderno=1234",
-      "info": ""
+      "info": null
     }
   ]
 }
