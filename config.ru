@@ -25,7 +25,10 @@ class API < Grape::API
           unless @shop
             # @todo validate params.shop
             @shop = SHOPS[params.shop.to_sym].new
-            @shop.login(*@credentials) if @credentials
+            if @credentials
+              @shop.login(*@credentials) or error! 'Access denied', 401
+              @crentials = nil
+            end
           end
           @shop
         end
