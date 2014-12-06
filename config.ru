@@ -71,10 +71,14 @@ class API < Grape::API
 end
 
 
-# include authorization in cache key
+# include authorization in cache key for urls with +/orders+ in it ...
 class Rack::Cache::KeyWithAuth < Rack::Cache::Key
   def generate
-    [super, @request.env['HTTP_AUTHORIZATION']].join
+    if @request.path =~ /\/orders/
+      [super, @request.env['HTTP_AUTHORIZATION']].join
+    else
+      super
+    end
   end
 end
 
