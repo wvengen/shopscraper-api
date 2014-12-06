@@ -11,6 +11,10 @@ class AHShop < Shop
   LIST_ORDERS_URL = BASEURL_SECURE+'appie/producten/eerder-gekocht/bestellingen'
   ORDER_URL = BASEURL_SECURE+'appie/producten/eerder-gekocht/bestelling'
 
+  def name
+    "Albert Heijn"
+  end
+
   def login(user, pass)
     status = false
     @mech.get LOGIN_URL do |page|
@@ -18,8 +22,8 @@ class AHShop < Shop
         form.userName = user
         form.password = pass
       end.submit
-      yield(page) if block_given?
-      return true if page.search('title').text =~ /redirect/i
+      status = (page.search('title').text =~ /redirect/i)
+      yield(page, status) if block_given?
     end
     status
   end

@@ -7,6 +7,53 @@ class JumboShop < Shop
   BASEURL = 'http://www.jumbo.com/'
   PRODUCT_URL = BASEURL+'producten/'
 
+  BASEURL_SECURE = 'https://www.jumbo.com/'
+  SHOPURL_SECURE = BASEURL_SECURE+'INTERSHOP/web/WFS/Jumbo-Grocery-Site/nl_NL/-/EUR/'
+  LOGIN_URL = SHOPURL_SECURE+'ViewUserAccount-ViewLoginStart'
+  LIST_ORDERS_URL = SHOPURL_SECURE+'ViewOrders-View'
+
+  def name
+    "Jumbo"
+  end
+
+  def login(login, pass)
+    status = false
+    @mech.get LOGIN_URL do |page|
+      m = page.body.match(/SYNCHRONIZER_TOKEN_VALUE\s*=\s*(['"])(.*?)\1/) or return false
+      synctoken = m[2]
+      page = page.form_with(id: 'login-user-form') do |form|
+        form.ShopLoginForm_Login = login
+        form.ShopLoginForm_Password = pass
+        form.add_field! 'SynchronizerToken', synctoken
+      end.submit
+      status = !(page.search('title').text =~ /login/i)
+      yield(page, status) if block_given?
+    end
+    status
+  end
+
+  def orders(options={})
+    orders = []
+    @mech.get LIST_ORDERS_URL do |page|
+      page.search('.jum-order-list-table tbody tr').each do |page|
+        order = OpenStruct.new
+        order.date = search_first_text(page, '.jum-order-date')
+        order.sum = search_first_text(page, '.jum-order-total')
+        order.state = search_first_text(page, '.jum-order-status')
+        order.id = search_first_text(page, '.jum-order-number')
+        order.via = search_first_text(page, '.jum-order-via')
+        #order.url = BASEURL+page.attribute('href').value
+        orders << order
+      end
+    end
+    orders
+  end
+
+  def order(order_id, options={})
+    order = OpenStruct.new
+    # @todo
+  end
+
   def product(id)
     product = OpenStruct.new
     @mech.get PRODUCT_URL+id do |page|

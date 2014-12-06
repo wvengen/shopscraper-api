@@ -11,20 +11,31 @@ class API < Grape::API
   prefix :api
   version :v1, using: :path
 
+  SHOPS = {
+    ah:    AHShop,
+    jumbo: JumboShop
+  }
+
   namespace :shop do
 
-    namespace :ah do
+    route_param :shop do
 
       helpers do
         def shop
-          @shop ||= AHShop.new
+          unless @shop
+            # @todo validate params.shop
+            @shop = SHOPS[params.shop.to_sym].new
+            @shop.login(*@credentials) if @credentials
+          end
+          @shop
         end
       end
 
       resources :orders do
 
-        http_basic({realm: 'AH webshop login'}) do |username, password|
-          shop.login(username, password)
+        http_basic({realm: "Webshop login"}) do |username, password|
+          # can't login right now as +params+ isn't set just yet
+          @credentials = [username, password]
         end
 
         desc "Return a user's past orders"
@@ -32,7 +43,7 @@ class API < Grape::API
           {orders: shop.orders.map(&:to_h)}
         end
 
-        route_param :id do
+        route_param :id, type: Integer, desc: "Order number" do
           desc "Return an order"
           get do
             order = shop.order(params.id, ean: params.ean)
@@ -45,7 +56,7 @@ class API < Grape::API
 
       resources :products do
 
-        route_param :id do
+        route_param :id, type: String, desc: "Product identifier" do
           desc "Return product information"
           get do
             product = shop.product(params.id)
@@ -54,25 +65,6 @@ class API < Grape::API
         end
       end
 
-    end
-
-    namespace :jumbo do
-
-      helpers do
-        def shop
-          @shop ||= JumboShop.new
-        end
-      end
-
-      resources :products do
-        route_param :id do
-          desc "Return product information"
-          get do
-            product = shop.product(params.id)
-            {product: product.to_h}
-          end
-        end
-      end
     end
 
   end
