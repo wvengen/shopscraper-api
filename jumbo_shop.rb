@@ -75,7 +75,7 @@ class JumboShop < Shop
         product.ingredients = page.search('.jum-ingredients-info li').map{|el| el.inner_text.strip}
         product.ingredients.last =~ /E\s*=\s*door de E\.G\. goedgekeurde hulpstof/i and product.ingredients.pop
 
-        nutrient_per = search_first_text(page, '.jum-nutritional-info table thead th:last-child') {|t| t.gsub!(/^\s*per\s*/i,'').gsub!(/\s*:\s*$/,'') }
+        nutrient_per = search_first_text(page, '.jum-nutritional-info table thead th:last-child') {|t| t.gsub(/^\s*per\s*/i,'').gsub(/\s*:\s*$/,'') }
         product.nutrients = page.search('.jum-nutritional-info table tbody').map do |el|
           {
             name: el.children.first.text.strip.gsub(/\s*:\s*$/,''),
