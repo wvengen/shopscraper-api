@@ -36,6 +36,8 @@ Returns AH product information.
 }
 ```
 
+A barcode is sometimes present, sometimes not (depending on product).
+
 ### `GET /api/v1/shop/jumbo/products/:id`
 
 Returns Jumbo product information.
