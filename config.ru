@@ -1,6 +1,7 @@
 require 'grape'
 require 'rack-cache'
 require 'rack/cache/key'
+require 'rack/cors'
 
 require_relative 'ah_shop'
 require_relative 'jumbo_shop'
@@ -73,6 +74,13 @@ class API < Grape::API
   end
 end
 
+# Allow CORS, since we're an API
+use Rack::Cors do
+  allow do
+    origins '*'
+    resource '/api/*', headers: :any, methods: [:get, :post, :put, :delete, :options]
+  end
+end
 
 # include authorization in cache key for urls with +/orders+ in it ...
 class Rack::Cache::KeyWithAuth < Rack::Cache::Key
