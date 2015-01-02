@@ -1,3 +1,4 @@
+require 'json'
 require 'ostruct'
 require 'typhoeus'
 require_relative 'shop'
@@ -8,8 +9,8 @@ class AHShop < Shop
 
   BASEURL_SECURE = 'https://www.ah.nl/'
   LOGIN_URL = BASEURL_SECURE+'mijn/inloggen/basis'
-  LIST_ORDERS_URL = BASEURL_SECURE+'appie/producten/eerder-gekocht/bestellingen'
-  ORDER_URL = BASEURL_SECURE+'appie/producten/eerder-gekocht/bestelling'
+  LIST_ORDERS_URL = BASEURL_SECURE+'service/rest/orders'
+  ORDER_URL = BASEURL_SECURE+'producten/eerder-gekocht/bestelling'
 
   def name
     "Albert Heijn"
@@ -22,7 +23,7 @@ class AHShop < Shop
         form.userName = user
         form.password = pass
       end.submit
-      status = (page.search('title').text =~ /redirect/i)
+      status = !!(page.search('title').text =~ /redirect/i)
       yield(page, status) if block_given?
     end
     status
@@ -31,12 +32,12 @@ class AHShop < Shop
   def orders(options={})
     orders = []
     @mech.get LIST_ORDERS_URL do |page|
-      page.search('a.order_card').each do |page|
+      JSON.parse(page.body)["orders"].each do |o|
         order = OpenStruct.new
-        order.date = search_first_text(page, '.date')
-        order.info = search_all_text(page, '.info')
-        order.url = BASEURL+page.attribute('href').value
-        order.id = order.url.sub(/^.*orderno=/, '')
+        order.date = o["fulfillment"]["date"]
+        order.id = o["id"]
+        order.url = ORDER_URL+"?orderno="+order.id.to_s
+        # @todo other fields like address, timeslot, type, state
         orders << order
       end
     end
