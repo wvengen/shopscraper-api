@@ -50,7 +50,7 @@ class API < Grape::API
         route_param :id, type: Integer, desc: "Order number" do
           desc "Return an order"
           get do
-            order = shop.order(params.id, ean: params.ean)
+            order = shop.order(params.id)
             order.products.map!(&:to_h)
             {order: order.to_h}
           end

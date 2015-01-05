@@ -107,11 +107,6 @@ Returns information about an order, most importantly its products (auth required
 }
 ```
 
-With a bit more effort, the barcode (ean) can be discovered. Add `ean=1` to the
-parameters when doing the request, and this will be returned as a product
-attribute when available. This does make the request quite a bit slower for
-more than a couple of products.
-
 
 Command-line example
 --------------------

@@ -55,7 +55,6 @@ class AHShop < Shop
       product.image_url = search_first_attr(page, 'meta[property="og:image"]', 'content')
       product.description = search_all_text(page, '.product-detail__content')
     end
-    find_eans([product])
     product
   end
 
@@ -93,9 +92,6 @@ class AHShop < Shop
       end
     end
 
-    # when requested, load images in parallel to figure out ean ...
-    find_eans(order.products) if options[:ean]
-
     order
   end
 
@@ -103,23 +99,6 @@ class AHShop < Shop
 
   def product_id_from_url(url)
     url.gsub('//', '/').match(/^#{PRODUCT_URL.gsub('//','/')}(.*?)(\/+.*)?$/) and $1
-  end
-
-  def find_eans(products)
-    hydra = Typhoeus::Hydra.new
-    products.each do |product|
-      if product.image_url
-        request = Typhoeus::Request.new(product.image_url, followlocation: true)
-        request.on_complete do |response|
-          if m=request.response.response_headers.match(/gtin([0-9]+)/)
-            product.ean = m[1]
-          end
-        end
-        hydra.queue(request)
-      end
-    end
-    hydra.run
-    products
   end
 
 end
