@@ -54,6 +54,7 @@ class AHShop < Shop
       product.brand_name = search_first_attr(page, 'meta[itemprop="brand"]', 'content')
       product.image_url = search_first_attr(page, 'meta[property="og:image"]', 'content')
       product.description = search_all_text(page, '.product-detail__content')
+      product.price = search_first_attr(page, 'meta[itemprop="price"]', 'content')
     end
     product
   end
